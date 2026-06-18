@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store'
-import type { InspectionItem } from '@/types'
+import type { InspectionItem, Rectification } from '@/types'
 import { CheckCircle, XCircle, Camera, ChevronDown, ChevronUp, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { addDays, format } from 'date-fns'
 
 interface ItemState {
   passed: boolean | null
@@ -14,7 +15,10 @@ interface ItemState {
 export default function InspectionExecute() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { plans, templates, updatePlan, addReport } = useAppStore()
+  const {
+    plans, templates, updatePlan, addReport,
+    addRectifications, updateStoreScore
+  } = useAppStore()
 
   const plan = id
     ? plans.find(p => p.id === id)
@@ -45,6 +49,13 @@ export default function InspectionExecute() {
   })
 
   const [submitted, setSubmitted] = useState(false)
+  const [generatedReportId, setGeneratedReportId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (plan && plan.status === 'planned') {
+      updatePlan(plan.id, { status: 'in_progress' })
+    }
+  }, [plan?.id, plan?.status, updatePlan])
 
   const totalMaxScore = useMemo(() =>
     categories.reduce((sum, cat) => sum + cat.items.reduce((s, item) => s + item.maxScore, 0), 0),
@@ -100,6 +111,11 @@ export default function InspectionExecute() {
   const handleSubmit = () => {
     if (!allChecked || submitted) return
 
+    const today = new Date()
+    const todayStr = format(today, 'yyyy-MM-dd')
+    const deadlineDate = addDays(today, 7)
+    const deadlineStr = format(deadlineDate, 'yyyy-MM-dd')
+
     const items: InspectionItem[] = categories.flatMap(cat =>
       cat.items.map(item => {
         const state = itemStates[item.id]
@@ -116,26 +132,50 @@ export default function InspectionExecute() {
       })
     )
 
+    const reportId = `r_${Date.now()}`
+
     if (plan) {
       updatePlan(plan.id, {
         status: 'completed',
-        completedDate: new Date().toISOString().split('T')[0]
+        completedDate: todayStr
       })
     }
 
     addReport({
-      id: `r_${Date.now()}`,
+      id: reportId,
       planId: plan?.id ?? 'demo',
       storeId: plan?.storeId ?? 'demo',
       storeName,
       supervisorName: plan?.supervisorName ?? '演示督查',
-      date: new Date().toISOString().split('T')[0],
+      date: todayStr,
       totalScore,
       maxScore: totalMaxScore,
       grade,
       items,
     })
 
+    const failedItems = items.filter(i => !i.passed)
+    if (failedItems.length > 0 && plan) {
+      const newRectifications: Rectification[] = failedItems.map((item, idx) => ({
+        id: `rect_${Date.now()}_${idx}`,
+        reportId,
+        itemId: item.id,
+        storeId: plan.storeId,
+        storeName: plan.storeName,
+        itemName: item.name,
+        category: item.category,
+        deductionReason: item.deductionReason || '巡检不合格',
+        status: 'pending',
+        deadline: deadlineStr,
+      }))
+      addRectifications(newRectifications)
+    }
+
+    if (plan) {
+      updateStoreScore(plan.storeId, totalScore, todayStr)
+    }
+
+    setGeneratedReportId(reportId)
     setSubmitted(true)
   }
 
@@ -403,18 +443,29 @@ export default function InspectionExecute() {
             <p className="mt-1 text-sm text-gray-500">
               {storeName} · 总分 {totalScore}/{totalMaxScore}
             </p>
-            <div className="mt-6 flex gap-3">
+            {generatedReportId && (
+              <p className="mt-2 text-xs text-emerald-600 bg-emerald-50 inline-block px-3 py-1 rounded-full">
+                不合格项已自动生成整改计划
+              </p>
+            )}
+            <div className="mt-6 grid grid-cols-3 gap-2">
               <button
                 onClick={() => navigate('/inspections')}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-3 py-2.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 返回列表
               </button>
               <button
-                onClick={() => navigate('/reports')}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-navy-800 rounded-lg hover:bg-navy-700 transition-colors"
+                onClick={() => navigate(`/reports/${generatedReportId}`)}
+                className="px-3 py-2.5 text-xs font-medium text-white bg-navy-800 rounded-lg hover:bg-navy-700 transition-colors"
               >
                 查看报告
+              </button>
+              <button
+                onClick={() => navigate('/rectifications')}
+                className="px-3 py-2.5 text-xs font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                去整改
               </button>
             </div>
           </div>

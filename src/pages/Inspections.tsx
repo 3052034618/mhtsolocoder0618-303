@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Plus, Filter, Calendar, List, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Filter, Calendar, List, X, ChevronLeft, ChevronRight, Eye, PlayCircle } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useAppStore } from '@/store'
@@ -41,7 +42,8 @@ const typeOptions: { value: TypeFilter; label: string }[] = [
 ]
 
 export default function Inspections() {
-  const { plans, stores, supervisors, templates, addPlan } = useAppStore()
+  const { plans, stores, supervisors, templates, addPlan, reports } = useAppStore()
+  const navigate = useNavigate()
 
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -231,10 +233,30 @@ export default function Inspections() {
                     <StatusBadge status={plan.status} />
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <button className="text-xs text-navy-400 hover:text-navy-700 transition-colors">查看</button>
-                      {(plan.status === 'planned' || plan.status === 'in_progress') && (
-                        <button className="text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors">执行</button>
+                    <div className="flex items-center gap-3">
+                      {plan.status === 'completed' ? (
+                        <button
+                          onClick={() => {
+                            const report = reports.find((r) => r.planId === plan.id)
+                            if (report) {
+                              navigate(`/reports/${report.id}`)
+                            } else {
+                              navigate('/reports')
+                            }
+                          }}
+                          className="flex items-center gap-1 text-xs text-navy-500 hover:text-navy-700 transition-colors"
+                        >
+                          <Eye size={14} />
+                          查看报告
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate(`/inspections/${plan.id}/execute`)}
+                          className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                        >
+                          <PlayCircle size={14} />
+                          执行巡检
+                        </button>
                       )}
                     </div>
                   </td>
