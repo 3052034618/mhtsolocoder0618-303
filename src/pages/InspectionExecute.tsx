@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store'
 import type { InspectionItem, Rectification } from '@/types'
-import { CheckCircle, XCircle, Camera, ChevronDown, ChevronUp, Send } from 'lucide-react'
+import { CheckCircle, XCircle, Camera, ChevronDown, ChevronUp, Send, X, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { addDays, format } from 'date-fns'
 
@@ -10,6 +10,14 @@ interface ItemState {
   passed: boolean | null
   deductionReason: string
   photos: string[]
+}
+
+const presetReasons: Record<string, string[]> = {
+  '食材存储': ['温度不达标', '食材过期', '存储不规范', '生熟混放'],
+  '卫生状况': ['地面不洁', '餐具未消毒', '垃圾桶未盖', '有虫鼠痕迹'],
+  '出餐速度': ['出餐超时', '外卖响应慢', '备料不足'],
+  '员工仪容': ['着装不规范', '未戴发帽', '健康证过期'],
+  '服务规范': ['服务话术不标准', '态度欠佳', '未主动问候'],
 }
 
 export default function InspectionExecute() {
@@ -70,9 +78,29 @@ export default function InspectionExecute() {
     [categories, itemStates]
   )
 
+  const isItemFailedIncomplete = (itemId: string): boolean => {
+    const state = itemStates[itemId]
+    if (!state || state.passed !== false) return false
+    return !state.deductionReason.trim() || state.photos.length === 0
+  }
+
+  const isItemComplete = (itemId: string): boolean => {
+    const state = itemStates[itemId]
+    if (!state || state.passed === null) return false
+    if (state.passed === true) return true
+    return state.deductionReason.trim() !== '' && state.photos.length > 0
+  }
+
   const checkedCount = Object.values(itemStates).filter(s => s.passed !== null).length
   const totalCount = Object.keys(itemStates).length
+  const failedCount = Object.values(itemStates).filter(s => s.passed === false).length
+  const failedCompleteCount = Object.keys(itemStates).filter(id =>
+    itemStates[id].passed === false && !isItemFailedIncomplete(id)
+  ).length
+  const incompleteFailedCount = Object.keys(itemStates).filter(id => isItemFailedIncomplete(id)).length
   const allChecked = checkedCount === totalCount && totalCount > 0
+  const allFailedComplete = incompleteFailedCount === 0
+  const canSubmit = allChecked && allFailedComplete && !submitted
   const progress = totalMaxScore > 0 ? totalScore / totalMaxScore : 0
   const grade = progress >= 0.9 ? 'A' : progress >= 0.8 ? 'B' : progress >= 0.6 ? 'C' : 'D'
 
@@ -99,17 +127,41 @@ export default function InspectionExecute() {
   }
 
   const simulatePhotoUpload = (itemId: string) => {
+    const count = Math.floor(Math.random() * 3) + 1
+    const newPhotos: string[] = []
+    for (let i = 0; i < count; i++) {
+      const timestamp = Date.now() + i
+      const prompt = encodeURIComponent('restaurant kitchen inspection problem food safety hygiene violation')
+      newPhotos.push(`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${prompt}&image_size=square_hd&t=${timestamp}`)
+    }
     setItemStates(prev => ({
       ...prev,
       [itemId]: {
         ...prev[itemId],
-        photos: [...prev[itemId].photos, `photo_${Date.now()}.jpg`]
+        photos: [...prev[itemId].photos, ...newPhotos]
       }
     }))
   }
 
+  const removePhoto = (itemId: string, photoIndex: number) => {
+    setItemStates(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        photos: prev[itemId].photos.filter((_, idx) => idx !== photoIndex)
+      }
+    }))
+  }
+
+  const applyPresetReason = (itemId: string, reason: string) => {
+    setItemStates(prev => ({
+      ...prev,
+      [itemId]: { ...prev[itemId], deductionReason: reason }
+    }))
+  }
+
   const handleSubmit = () => {
-    if (!allChecked || submitted) return
+    if (!canSubmit) return
 
     const today = new Date()
     const todayStr = format(today, 'yyyy-MM-dd')
@@ -167,6 +219,7 @@ export default function InspectionExecute() {
         deductionReason: item.deductionReason || '巡检不合格',
         status: 'pending',
         deadline: deadlineStr,
+        problemPhotos: item.photos,
       }))
       addRectifications(newRectifications)
     }
@@ -189,8 +242,15 @@ export default function InspectionExecute() {
 
   const circumference = 2 * Math.PI * 24
 
+  const getSubmitDisabledMessage = (): string => {
+    if (submitted) return '已提交'
+    if (!allChecked) return `还需检查 ${totalCount - checkedCount} 项`
+    if (!allFailedComplete) return `${incompleteFailedCount} 个不合格项缺少原因或照片`
+    return ''
+  }
+
   return (
-    <div className="pb-28">
+    <div className="pb-40">
       <div className="bg-navy-900 text-white px-6 py-5">
         <div className="flex items-center justify-between">
           <div>
@@ -216,6 +276,15 @@ export default function InspectionExecute() {
             <span className="w-2 h-2 rounded-full bg-amber-400" />
             当前 {totalScore}/{totalMaxScore}
           </div>
+          {failedCount > 0 && (
+            <div className="flex items-center gap-1.5 text-xs text-navy-300">
+              <span className={cn(
+                'w-2 h-2 rounded-full',
+                allFailedComplete ? 'bg-emerald-400' : 'bg-amber-400'
+              )} />
+              不合格完整 {failedCompleteCount}/{failedCount}
+            </div>
+          )}
         </div>
       </div>
 
@@ -228,6 +297,7 @@ export default function InspectionExecute() {
             (s, item) => s + (itemStates[item.id]?.passed === true ? item.maxScore : 0), 0
           )
           const catMaxScore = category.items.reduce((s, item) => s + item.maxScore, 0)
+          const catIncomplete = category.items.filter(i => isItemFailedIncomplete(i.id)).length
 
           return (
             <div key={category.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -245,6 +315,11 @@ export default function InspectionExecute() {
                   )}>
                     {catChecked}/{catTotal} 已检
                   </span>
+                  {catIncomplete > 0 && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
+                      {catIncomplete} 待完善
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-amber-400 font-medium">
@@ -263,6 +338,9 @@ export default function InspectionExecute() {
                     const state = itemStates[item.id]
                     const isPassed = state?.passed === true
                     const isFailed = state?.passed === false
+                    const isIncomplete = isItemFailedIncomplete(item.id)
+                    const complete = isItemComplete(item.id)
+                    const presets = presetReasons[category.name] || []
 
                     return (
                       <div key={item.id} className="px-5 py-4">
@@ -270,14 +348,23 @@ export default function InspectionExecute() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h4 className="text-sm font-medium text-gray-800">{item.name}</h4>
-                              {isPassed && <CheckCircle size={14} className="text-emerald-500 flex-shrink-0" />}
-                              {isFailed && <XCircle size={14} className="text-red-500 flex-shrink-0" />}
+                              {complete && isPassed && <CheckCircle size={14} className="text-emerald-500 flex-shrink-0" />}
+                              {isFailed && complete && <CheckCircle size={14} className="text-emerald-500 flex-shrink-0" />}
+                              {isFailed && !complete && <AlertTriangle size={14} className="text-amber-500 flex-shrink-0" />}
                             </div>
                             <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
                           </div>
-                          <span className="text-xs text-gray-400 whitespace-nowrap mt-0.5">
-                            满分 {item.maxScore}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {complete && (
+                              <CheckCircle size={16} className="text-emerald-500" />
+                            )}
+                            {isFailed && !complete && (
+                              <AlertTriangle size={16} className="text-amber-500" />
+                            )}
+                            <span className="text-xs text-gray-400 whitespace-nowrap mt-0.5">
+                              满分 {item.maxScore}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-3 mt-3">
@@ -313,6 +400,48 @@ export default function InspectionExecute() {
 
                         {isFailed && (
                           <div className="mt-3 space-y-3 pl-1">
+                            {isIncomplete && (
+                              <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                                <AlertTriangle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                                <div className="text-xs text-amber-700">
+                                  {!state?.deductionReason.trim() && state?.photos.length === 0 && (
+                                    <span>请填写扣分原因并上传至少1张照片</span>
+                                  )}
+                                  {!state?.deductionReason.trim() && state?.photos && state.photos.length > 0 && (
+                                    <span>请填写扣分原因</span>
+                                  )}
+                                  {state?.deductionReason.trim() && (!state?.photos || state.photos.length === 0) && (
+                                    <span>请上传至少1张照片</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {presets.length > 0 && (
+                              <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1.5">快速选择</label>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {presets.map(preset => (
+                                    <button
+                                      key={preset}
+                                      type="button"
+                                      onClick={() => applyPresetReason(item.id, preset)}
+                                      disabled={submitted}
+                                      className={cn(
+                                        'px-2.5 py-1 text-xs rounded-md transition-colors',
+                                        state?.deductionReason === preset
+                                          ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                                          : 'bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-600 border border-transparent',
+                                        submitted && 'cursor-default'
+                                      )}
+                                    >
+                                      {preset}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             <div>
                               <label className="block text-xs font-medium text-gray-500 mb-1.5">扣分原因</label>
                               <textarea
@@ -320,19 +449,48 @@ export default function InspectionExecute() {
                                 onChange={e => setItemDeduction(item.id, e.target.value)}
                                 disabled={submitted}
                                 placeholder="请输入扣分原因..."
-                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 resize-none disabled:bg-gray-50 disabled:text-gray-400"
+                                className={cn(
+                                  'w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 resize-none disabled:bg-gray-50 disabled:text-gray-400',
+                                  isIncomplete && !state?.deductionReason.trim()
+                                    ? 'border-red-300 bg-red-50'
+                                    : 'border-gray-200'
+                                )}
                                 rows={2}
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-1.5">现场照片</label>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-medium text-gray-500">
+                                  现场照片
+                                  {state?.photos && state.photos.length > 0 && (
+                                    <span className="ml-2 text-amber-600">
+                                      ({state.photos.length} 张)
+                                    </span>
+                                  )}
+                                </label>
+                                {isIncomplete && (!state?.photos || state.photos.length === 0) && (
+                                  <span className="text-xs text-red-500">请至少上传1张</span>
+                                )}
+                              </div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 {state?.photos.map((photo, idx) => (
                                   <div
                                     key={idx}
-                                    className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 border border-gray-200"
+                                    className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200"
                                   >
-                                    照片{idx + 1}
+                                    <img
+                                      src={photo}
+                                      alt={`照片${idx + 1}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    {!submitted && (
+                                      <button
+                                        onClick={() => removePhoto(item.id, idx)}
+                                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors"
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    )}
                                   </div>
                                 ))}
                                 <button
@@ -342,11 +500,12 @@ export default function InspectionExecute() {
                                     'w-16 h-16 rounded-lg border-2 border-dashed flex flex-col items-center justify-center transition-colors',
                                     submitted
                                       ? 'border-gray-200 text-gray-300 cursor-default'
-                                      : 'border-gray-300 text-gray-400 hover:border-amber-400 hover:text-amber-500'
+                                      : 'border-gray-300 text-gray-400 hover:border-amber-400 hover:text-amber-500',
+                                    isIncomplete && (!state?.photos || state.photos.length === 0) && 'border-red-300'
                                   )}
                                 >
                                   <Camera size={18} />
-                                  <span className="text-[10px] mt-0.5">拍照</span>
+                                  <span className="text-[10px] mt-0.5">拍照存证</span>
                                 </button>
                               </div>
                             </div>
@@ -361,6 +520,22 @@ export default function InspectionExecute() {
           )
         })}
       </div>
+
+      {incompleteFailedCount > 0 && !submitted && (
+        <div className="px-4 pb-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-amber-800">需要完善的信息</h4>
+                <p className="text-xs text-amber-700 mt-1">
+                  还有 <span className="font-bold">{incompleteFailedCount}</span> 个不合格项缺少扣分原因或照片，请补充完整后再提交。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-navy-900 text-white px-6 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
         <div className="flex items-center justify-between max-w-3xl mx-auto">
@@ -392,7 +567,11 @@ export default function InspectionExecute() {
                 <span className="text-sm text-navy-400 font-normal ml-0.5">/ {totalMaxScore}</span>
               </div>
               <div className="text-xs text-navy-400 mt-0.5">
-                已检 {checkedCount}/{totalCount} · 等级
+                已检 {checkedCount}/{totalCount}
+                {failedCount > 0 && (
+                  <span> · 不合格完整 {failedCompleteCount}/{failedCount}</span>
+                )}
+                {' · '}等级
                 <span className={cn(
                   'ml-1 font-medium',
                   grade === 'A' ? 'text-emerald-400' :
@@ -406,17 +585,18 @@ export default function InspectionExecute() {
           </div>
 
           <div className="flex items-center gap-3">
-            {!allChecked && !submitted && (
+            {!canSubmit && !submitted && (
               <span className="text-xs text-navy-400">
-                还需检查 {totalCount - checkedCount} 项
+                {getSubmitDisabledMessage()}
               </span>
             )}
             <button
               onClick={handleSubmit}
-              disabled={!allChecked || submitted}
+              disabled={!canSubmit}
+              title={!canSubmit ? getSubmitDisabledMessage() : ''}
               className={cn(
                 'flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all',
-                allChecked && !submitted
+                canSubmit
                   ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/25 active:scale-95'
                   : 'bg-navy-700/80 text-navy-400 cursor-not-allowed'
               )}

@@ -222,52 +222,52 @@ export const inspectionReports: InspectionReport[] = [
 
 export const rectifications: Rectification[] = [
   {
-    id: 'rect1', reportId: 'r2', itemId: 'ri12', storeId: 's2', storeName: '味府·天河城店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷藏柜温度8.5℃，超出标准范围2-8℃', status: 'completed', plan: '更换冷藏柜温控器，增加每日温度记录', deadline: '2026-06-20', rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=clean+refrigerator+with+proper+temperature+display+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-18', confirmedAt: '2026-06-19', confirmedBy: '林督导',
+    id: 'rect1', reportId: 'r2', itemId: 'ri12', storeId: 's2', storeName: '味府·天河城店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷藏柜温度8.5℃，超出标准范围2-8℃', status: 'completed', plan: '更换冷藏柜温控器，增加每日温度记录', deadline: '2026-06-20', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dirty+refrigerator+with+disorganized+food+items+in+restaurant+kitchen&image_size=landscape_4_3'], rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=clean+refrigerator+with+proper+temperature+display+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-18', confirmedAt: '2026-06-19', confirmedBy: '林督导', confirmNote: '整改到位，温度已恢复正常范围，建议持续监控温度记录。',
   },
   {
-    id: 'rect2', reportId: 'r2', itemId: 'ri13', storeId: 's2', storeName: '味府·天河城店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '发现2包调味料已过保质期3天', status: 'completed', plan: '建立每日保质期巡检制度，临期食材提前3天预警', deadline: '2026-06-22', rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=organized+food+storage+with+expiry+date+labels+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-20', confirmedAt: '2026-06-21', confirmedBy: '林督导',
+    id: 'rect2', reportId: 'r2', itemId: 'ri13', storeId: 's2', storeName: '味府·天河城店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '发现2包调味料已过保质期3天', status: 'completed', plan: '建立每日保质期巡检制度，临期食材提前3天预警', deadline: '2026-06-22', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=expired+food+items+in+restaurant+storage+shelf&image_size=landscape_4_3'], rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=organized+food+storage+with+expiry+date+labels+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-20', confirmedAt: '2026-06-21', confirmedBy: '林督导', confirmNote: '保质期管理规范已建立，临期标识清晰。',
   },
   {
-    id: 'rect3', reportId: 'r2', itemId: 'ri15', storeId: 's2', storeName: '味府·天河城店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '灶台区域地面有明显油渍未清理', status: 'rectifying', plan: '增加午间清洁频次，采购专业去油清洁剂', deadline: '2026-06-25', rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=clean+kitchen+floor+being+mopped+by+staff+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-22',
+    id: 'rect3', reportId: 'r2', itemId: 'ri15', storeId: 's2', storeName: '味府·天河城店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '灶台区域地面有明显油渍未清理', status: 'rectifying', plan: '增加午间清洁频次，采购专业去油清洁剂', deadline: '2026-06-25', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dirty+kitchen+floor+with+grease+stains+in+restaurant&image_size=landscape_4_3'], rectificationPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=clean+kitchen+floor+being+mopped+by+staff+in+restaurant&image_size=landscape_4_3'], submittedAt: '2026-06-22',
   },
   {
-    id: 'rect4', reportId: 'r4', itemId: 'ri34', storeId: 's4', storeName: '味府·春熙路店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷藏柜故障，温度达12℃，食材存在安全风险', status: 'planned', plan: '联系设备供应商维修，临时启用备用冷柜', deadline: '2026-06-22',
+    id: 'rect4', reportId: 'r4', itemId: 'ri34', storeId: 's4', storeName: '味府·春熙路店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷藏柜故障，温度达12℃，食材存在安全风险', status: 'planned', plan: '联系设备供应商维修，临时启用备用冷柜', deadline: '2026-06-16', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=broken+refrigerator+in+restaurant+with+warm+temperature&image_size=landscape_4_3'],
   },
   {
-    id: 'rect5', reportId: 'r4', itemId: 'ri35', storeId: 's4', storeName: '味府·春熙路店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '5种食材过期未清理，其中2种超过保质期1周', status: 'planned', plan: '立即清理所有过期食材，建立食材入库登记台账', deadline: '2026-06-23',
+    id: 'rect5', reportId: 'r4', itemId: 'ri35', storeId: 's4', storeName: '味府·春熙路店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '5种食材过期未清理，其中2种超过保质期1周', status: 'planned', plan: '立即清理所有过期食材，建立食材入库登记台账', deadline: '2026-06-17', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=multiple+expired+food+packages+in+restaurant+storage&image_size=landscape_4_3'],
   },
   {
-    id: 'rect6', reportId: 'r4', itemId: 'ri36', storeId: 's4', storeName: '味府·春熙路店', itemName: '存储区域整洁', category: '食材存储', deductionReason: '存储区杂物堆放，食材未离地存放', status: 'pending', deadline: '2026-06-25',
+    id: 'rect6', reportId: 'r4', itemId: 'ri36', storeId: 's4', storeName: '味府·春熙路店', itemName: '存储区域整洁', category: '食材存储', deductionReason: '存储区杂物堆放，食材未离地存放', status: 'pending', deadline: '2026-06-25', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=messy+storage+room+in+restaurant+with+cluttered+shelves&image_size=landscape_4_3'],
   },
   {
-    id: 'rect7', reportId: 'r4', itemId: 'ri37', storeId: 's4', storeName: '味府·春熙路店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '地面多处积水和食物残渣，排水沟堵塞', status: 'pending', deadline: '2026-06-25',
+    id: 'rect7', reportId: 'r4', itemId: 'ri37', storeId: 's4', storeName: '味府·春熙路店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '地面多处积水和食物残渣，排水沟堵塞', status: 'pending', deadline: '2026-06-19', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=very+dirty+kitchen+floor+with+food+waste+and+grease&image_size=landscape_4_3'],
   },
   {
-    id: 'rect8', reportId: 'r4', itemId: 'ri38', storeId: 's4', storeName: '味府·春熙路店', itemName: '餐具消毒合规', category: '卫生状况', deductionReason: '部分餐具消毒记录缺失，抽检发现水渍残留', status: 'pending', deadline: '2026-06-26',
+    id: 'rect8', reportId: 'r4', itemId: 'ri38', storeId: 's4', storeName: '味府·春熙路店', itemName: '餐具消毒合规', category: '卫生状况', deductionReason: '部分餐具消毒记录缺失，抽检发现水渍残留', status: 'pending', deadline: '2026-06-26', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=improperly+washed+dishes+and+utensils+in+restaurant&image_size=landscape_4_3'],
   },
   {
-    id: 'rect9', reportId: 'r6', itemId: 'ri56', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷柜温度偏高且生熟食材混放', status: 'planned', plan: '调整冷柜温度，严格执行生熟分区存放', deadline: '2026-06-24',
+    id: 'rect9', reportId: 'r6', itemId: 'ri56', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '冷链温度达标', category: '食材存储', deductionReason: '冷柜温度偏高且生熟食材混放', status: 'planned', plan: '调整冷柜温度，严格执行生熟分区存放', deadline: '2026-06-24', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=unhygienic+refrigerator+with+cross+contamination+risk+in+restaurant&image_size=landscape_4_3'],
   },
   {
-    id: 'rect10', reportId: 'r6', itemId: 'ri57', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '大量食材过期，蔬菜有腐烂现象', status: 'pending', deadline: '2026-06-23',
+    id: 'rect10', reportId: 'r6', itemId: 'ri57', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '食材保质期管理', category: '食材存储', deductionReason: '大量食材过期，蔬菜有腐烂现象', status: 'pending', deadline: '2026-06-18', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rotten+vegetables+and+expired+food+in+restaurant+kitchen&image_size=landscape_4_3'],
   },
   {
-    id: 'rect11', reportId: 'r6', itemId: 'ri59', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '地面严重积水油滑，存在安全隐患', status: 'pending', deadline: '2026-06-25',
+    id: 'rect11', reportId: 'r6', itemId: 'ri59', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '厨房地面清洁', category: '卫生状况', deductionReason: '地面严重积水油滑，存在安全隐患', status: 'pending', deadline: '2026-06-20', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=flooded+dirty+kitchen+floor+with+grease+and+food+waste&image_size=landscape_4_3'],
   },
   {
-    id: 'rect12', reportId: 'r6', itemId: 'ri60', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '餐具消毒合规', category: '卫生状况', deductionReason: '消毒柜未正常工作，使用化学消毒但浓度不达标', status: 'pending', deadline: '2026-06-26',
+    id: 'rect12', reportId: 'r6', itemId: 'ri60', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '餐具消毒合规', category: '卫生状况', deductionReason: '消毒柜未正常工作，使用化学消毒但浓度不达标', status: 'pending', deadline: '2026-06-26', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=old+broken+dishwasher+in+restaurant+kitchen&image_size=landscape_4_3'],
   },
   {
-    id: 'rect13', reportId: 'r6', itemId: 'ri61', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '垃圾桶加盖分类', category: '卫生状况', deductionReason: '垃圾桶溢出未及时清理，无分类措施', status: 'pending', deadline: '2026-06-24',
+    id: 'rect13', reportId: 'r6', itemId: 'ri61', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '垃圾桶加盖分类', category: '卫生状况', deductionReason: '垃圾桶溢出未及时清理，无分类措施', status: 'pending', deadline: '2026-06-21', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=overflowing+garbage+bin+without+lid+in+restaurant+kitchen&image_size=landscape_4_3'],
   },
   {
-    id: 'rect14', reportId: 'r6', itemId: 'ri64', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '着装规范', category: '员工仪容', deductionReason: '多名员工着装不规范', status: 'pending', deadline: '2026-06-26',
+    id: 'rect14', reportId: 'r6', itemId: 'ri64', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '着装规范', category: '员工仪容', deductionReason: '多名员工着装不规范', status: 'pending', deadline: '2026-06-26', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=restaurant+worker+without+proper+uniform+and+hairnet&image_size=landscape_4_3'],
   },
   {
-    id: 'rect15', reportId: 'r6', itemId: 'ri65', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '健康证公示', category: '员工仪容', deductionReason: '2名员工健康证过期未更新', status: 'pending', deadline: '2026-06-30',
+    id: 'rect15', reportId: 'r6', itemId: 'ri65', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '健康证公示', category: '员工仪容', deductionReason: '2名员工健康证过期未更新', status: 'pending', deadline: '2026-06-30', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=expired+health+certificate+notice+on+restaurant+wall&image_size=landscape_4_3'],
   },
   {
-    id: 'rect16', reportId: 'r6', itemId: 'ri66', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '服务话术标准', category: '服务规范', deductionReason: '服务人员缺乏基本话术培训', status: 'pending', deadline: '2026-06-28',
+    id: 'rect16', reportId: 'r6', itemId: 'ri66', storeId: 's6', storeName: '味府·福田COCO Park店', itemName: '服务话术标准', category: '服务规范', deductionReason: '服务人员缺乏基本话术培训', status: 'pending', deadline: '2026-06-28', problemPhotos: ['https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=restaurant+staff+training+session&image_size=landscape_4_3'],
   },
 ]
 

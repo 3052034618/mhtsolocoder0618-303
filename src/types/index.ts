@@ -58,6 +58,7 @@ export interface Rectification {
   itemName: string
   category: string
   deductionReason: string
+  problemPhotos?: string[]
   status: 'pending' | 'planned' | 'rectifying' | 'completed'
   plan?: string
   deadline?: string
@@ -65,6 +66,7 @@ export interface Rectification {
   submittedAt?: string
   confirmedAt?: string
   confirmedBy?: string
+  confirmNote?: string
 }
 
 export interface TemplateItem {
